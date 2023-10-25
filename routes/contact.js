@@ -2,23 +2,30 @@ const express = require('express');
 const Contact = require('../models/Contact');
 const router = express.Router();
 
-router.get('/test', (req, res) => {
-    res.send('hello');
-});
+
 
 router.post("/add_contact", async (req, res) => {
     try {
-        const { name, email, phone } = req.body; // Destructure values from req.body
-        const newContact = new Contact({ name, email, phone }); // Create a new instance of the Contact model
+        const { name, email, phone } = req.body; 
+        const newContact = new Contact({ name, email, phone }); 
 
-        await newContact.save(); // Save the new contact to the database
-        res.status(200).send({ msg: "Contact added", newContact }); // Send a success response with the new contact data
+        await newContact.save(); 
+        res.status(200).send({ msg: "Contact added", newContact });
     } catch (error) {
-        res.status(400).send({ msg: "Contact not added", error }); // Send an error response if something goes wrong
+        res.status(400).send({ msg: "Contact not added", error }); 
     }
 });
+router.get("/get_contacts" , async(req,res)=>{
+    try {
+      const contactlist = await Contact.find()
+      res.status(200).send({msg : "list",contactlist})
+    } catch (error) {
+      res.status(400).send({msg : "can not get list",error})            
+    }  
+  });
 
-router.get('/getcontacts/:id', async (req, res) => {
+
+router.get('/getonecontact/:id', async (req, res) => {
     try {
         const contact = await Contact.findById(req.params.id);
 
@@ -49,11 +56,12 @@ router.delete('/deletecontact/:id', async (req, res) => {
     }
 });
 
-router.put('/updatecontact/id', async (req, res) => {
+router.put('/updatecontact/:id', async (req, res) => {
     try {
         const { id } = req.params;
+        const updateData = req.body; 
 
-        const updatedContact = await Contact.findByIdAndUpdate( { id },);
+        const updatedContact = await Contact.findByIdAndUpdate(id, updateData, { new: true });
 
         if (!updatedContact) {
             return res.status(404).send({ msg: 'Contact not found' });
@@ -65,6 +73,7 @@ router.put('/updatecontact/id', async (req, res) => {
         res.status(500).send({ msg: 'Internal Server Error', error });
     }
 });
+
 
 
 module.exports = router;
